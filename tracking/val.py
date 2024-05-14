@@ -58,14 +58,14 @@ def trackeval(
     args = [
         sys.executable, EXAMPLES / 'val_utils' / 'scripts' / 'run_mot_challenge.py',
         "--GT_FOLDER", str(gt_folder),
-        "--BENCHMARK", "",
+        "--BENCHMARK", "USVTrack",
         "--TRACKERS_FOLDER", args.exp_folder_path,
         "--TRACKERS_TO_EVAL", "",
-        "--SPLIT_TO_EVAL", "train",
+        "--SPLIT_TO_EVAL", "test",
         "--METRICS", *metrics,
         "--USE_PARALLEL", "True",
         "--TRACKER_SUB_FOLDER", "",
-        "--NUM_PARALLEL_CORES", str(4),
+        "--NUM_PARALLEL_CORES", str(8),
         "--SKIP_SPLIT_FOL", "True",
         "--SEQ_INFO", *d
     ]
@@ -103,14 +103,13 @@ def parse_opt():
                         help='confidence threshold')
     parser.add_argument('--iou', type=float, default=0.7,
                         help='intersection over union (IoU) threshold for NMS')
-    parser.add_argument('--device', default='',
+    parser.add_argument('--device', default='1',
                         help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--show', action='store_true',
                         help='display tracking video results')
     parser.add_argument('--save', action='store_true',
                         help='save video tracking results')
-    # class 0 is person, 1 is bycicle, 2 is car... 79 is oven
-    parser.add_argument('--classes', nargs='+', type=int, default=0,
+    parser.add_argument('--classes', nargs='+', type=int, default=[0, 1, 2],
                         help='filter by class: --classes 0, or --classes 0 2 3')
     parser.add_argument('--project', default=ROOT / 'runs' / 'mot', type=Path,
                         help='save results to project/name')
@@ -126,19 +125,19 @@ def parse_opt():
                         help='use FP16 half-precision inference')
     parser.add_argument('--vid-stride', type=int, default=1,
                         help='video frame-rate stride')
-    parser.add_argument('--show-labels', action='store_false',
+    parser.add_argument('--show-labels', default=True, action='store_false',
                         help='either show all or only bboxes')
-    parser.add_argument('--show-conf', action='store_false',
+    parser.add_argument('--show-conf', default=True, action='store_false',
                         help='hide confidences when show')
-    parser.add_argument('--save-txt', action='store_true',
+    parser.add_argument('--save-txt', default=True, action='store_true',
                         help='save tracking results in a txt file')
     parser.add_argument('--save-id-crops', action='store_true',
                         help='save each crop to its respective id folder')
-    parser.add_argument('--save-mot', action='store_true',
+    parser.add_argument('--save-mot', default=True, action='store_true',
                         help='save tracking results in a single txt file')
     parser.add_argument('--line-width', default=None, type=int,
                         help='The line width of the bounding boxes. If None, it is scaled to the image size.')
-    parser.add_argument('--per-class', default=False, action='store_true',
+    parser.add_argument('--per-class', default=True, action='store_true',
                         help='not mix up classes when tracking')
     parser.add_argument('--verbose', default=True, action='store_true',
                         help='print results per frame')
@@ -146,7 +145,7 @@ def parse_opt():
                         help='class-agnostic NMS')
     parser.add_argument('--benchmark', type=str, default='MOT17',
                         help='MOT16, MOT17, MOT20')
-    parser.add_argument('--split', type=str, default='train',
+    parser.add_argument('--split', type=str, default='test',
                         help='existing project/name ok, do not increment')
 
     opt = parser.parse_args()

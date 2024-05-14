@@ -98,6 +98,13 @@ def run(args):
     # store custom args in predictor
     yolo.predictor.custom_args = args
 
+    # touch new file, fixed bug for no results
+    p = yolo.predictor.save_dir / 'mot' / (Path(args.source).parent.name + '.txt')
+    yolo.predictor.mot_txt_path = p
+    yolo.predictor.mot_txt_path.parent.mkdir(parents=True, exist_ok=True)
+    # create mot txt file
+    yolo.predictor.mot_txt_path.touch(exist_ok=True)
+    
     for r in results:
 
         img = yolo.predictor.trackers[0].plot_results(r.orig_img, args.show_trajectories)
@@ -131,7 +138,6 @@ def parse_opt():
                         help='display tracking video results')
     parser.add_argument('--save', action='store_true',
                         help='save video tracking results')
-    # class 0 is person, 1 is bycicle, 2 is car... 79 is oven
     parser.add_argument('--classes', nargs='+', type=int,
                         help='filter by class: --classes 0, or --classes 0 2 3')
     parser.add_argument('--project', default=ROOT / 'runs' / 'track',
@@ -144,19 +150,19 @@ def parse_opt():
                         help='use FP16 half-precision inference')
     parser.add_argument('--vid-stride', type=int, default=1,
                         help='video frame-rate stride')
-    parser.add_argument('--show-labels', action='store_false',
+    parser.add_argument('--show-labels', default=True, action='store_false',
                         help='either show all or only bboxes')
-    parser.add_argument('--show-conf', action='store_false',
+    parser.add_argument('--show-conf', default=True, action='store_false',
                         help='hide confidences when show')
-    parser.add_argument('--show-trajectories', action='store_true',
+    parser.add_argument('--show-trajectories', default=True, action='store_true',
                         help='show confidences')
-    parser.add_argument('--save-txt', action='store_true',
+    parser.add_argument('--save-txt', default=True, action='store_true',
                         help='save tracking results in a txt file')
     parser.add_argument('--save-id-crops', action='store_true',
                         help='save each crop to its respective id folder')
     parser.add_argument('--line-width', default=None, type=int,
                         help='The line width of the bounding boxes. If None, it is scaled to the image size.')
-    parser.add_argument('--per-class', default=False, action='store_true',
+    parser.add_argument('--per-class', default=True, action='store_true',
                         help='not mix up classes when tracking')
     parser.add_argument('--verbose', default=True, action='store_true',
                         help='print results per frame')

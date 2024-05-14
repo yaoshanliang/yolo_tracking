@@ -103,12 +103,11 @@ def parse_opt():
                         help='intersection over union (IoU) threshold for NMS')
     parser.add_argument('--device', default='',
                         help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--show', action='store_true',
+    parser.add_argument('--show', default=False, action='store_true',
                         help='display tracking video results')
-    parser.add_argument('--save', action='store_true',
+    parser.add_argument('--save', default=False, action='store_true',
                         help='save video tracking results')
-    # class 0 is person, 1 is bycicle, 2 is car... 79 is oven
-    parser.add_argument('--classes', nargs='+', type=int, default=0,
+    parser.add_argument('--classes', nargs='+', type=int, default=[0, 1, 2],
                         help='filter by class: --classes 0, or --classes 0 2 3')
     parser.add_argument('--exist-ok', action='store_true',
                         help='existing project/name ok, do not increment')
@@ -116,19 +115,19 @@ def parse_opt():
                         help='use FP16 half-precision inference')
     parser.add_argument('--vid-stride', type=int, default=1,
                         help='video frame-rate stride')
-    parser.add_argument('--show-labels', action='store_false',
+    parser.add_argument('--show-labels', default=True, action='store_false',
                         help='either show all or only bboxes')
-    parser.add_argument('--show-conf', action='store_false',
+    parser.add_argument('--show-conf', default=True, action='store_false',
                         help='hide confidences when show')
-    parser.add_argument('--save-txt', action='store_true',
+    parser.add_argument('--save-txt', default=True, action='store_true',
                         help='save tracking results in a txt file')
     parser.add_argument('--save-id-crops', action='store_true',
                         help='save each crop to its respective id folder')
-    parser.add_argument('--save-mot', action='store_true',
+    parser.add_argument('--save-mot', default=True, action='store_true',
                         help='save tracking results in a single txt file')
     parser.add_argument('--line-width', default=None, type=int,
                         help='The line width of the bounding boxes. If None, it is scaled to the image size.')
-    parser.add_argument('--per-class', default=False, action='store_true',
+    parser.add_argument('--per-class', default=True, action='store_true',
                         help='not mix up classes when tracking')
     parser.add_argument('--verbose', default=True, action='store_true',
                         help='print results per frame')
@@ -148,10 +147,12 @@ def run_generate_mot_results(opt):
 
     exp_folder_path = opt.project / (str(opt.dets) + "_" + str(opt.embs) + "_" + str(opt.tracking_method))
     exp_folder_path = increment_path(path=exp_folder_path, sep="_", exist_ok=False)
+    print(exp_folder_path)
     opt.exp_folder_path = exp_folder_path
     dets_file_paths = [item for item in (opt.project.parent / "dets_n_embs" / opt.dets / 'dets').glob('*.txt')]
     embs_file_paths = [item for item in (opt.project.parent / "dets_n_embs" / opt.dets / 'embs' /  opt.embs).glob('*.txt')]
-    print(dets_file_paths)
+    print((opt.project.parent / "dets_n_embs" / opt.dets / 'dets').glob('*.txt'))
+    print(opt.project.parent, opt.project.parent / "dets_n_embs" / opt.dets / 'dets',  dets_file_paths)
     print(embs_file_paths)
     for d, e in zip(dets_file_paths, embs_file_paths):
         opt.dets_file_path = d

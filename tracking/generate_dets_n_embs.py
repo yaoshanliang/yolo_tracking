@@ -76,7 +76,6 @@ def run(args):
     
     with open(str(dets_path), 'ab+') as f:  # append binary mode
         np.savetxt(f, [], fmt='%f', header=str(args.source))  # save as ints instead of scientific notation
-
     for frame_idx, r in enumerate(tqdm(results, desc="Frames")):
 
         nr_dets = len(r.boxes)
@@ -127,8 +126,7 @@ def parse_opt():
                         help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--tracking-method', type=str, default='deepocsort',
                         help='deepocsort, botsort, strongsort, ocsort, bytetrack')
-    # class 0 is person, 1 is bycicle, 2 is car... 79 is oven
-    parser.add_argument('--classes', nargs='+', type=int, default=0,
+    parser.add_argument('--classes', nargs='+', type=int, default=[0, 1, 2],
                         help='filter by class: --classes 0, or --classes 0 2 3')
     parser.add_argument('--project', default=ROOT / 'runs' / 'dets_n_embs',
                         help='save results to project/name')
@@ -140,7 +138,7 @@ def parse_opt():
                         help='use FP16 half-precision inference')
     parser.add_argument('--vid-stride', type=int, default=1,
                         help='video frame-rate stride')
-    parser.add_argument('--per-class', default=False, action='store_true',
+    parser.add_argument('--per-class', default=True, action='store_true',
                         help='not mix up classes when tracking')
     parser.add_argument('--verbose', default=True, action='store_true',
                         help='print results per frame')
@@ -154,7 +152,6 @@ def parse_opt():
 if __name__ == "__main__":
     opt = parse_opt()
     mot_folder_paths = [item for item in Path(opt.source).iterdir()]
-    print(mot_folder_paths)
     for y in opt.yolo_model:
         opt.yolo_model = y
         opt.name = y.stem

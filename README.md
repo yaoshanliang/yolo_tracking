@@ -1,3 +1,78 @@
+# Usage for USVTrack
+
+## Installation
+
+
+```
+git clone https://github.com/yaoshanliang/yolo_tracking.git
+cd yolo_tracking
+conda create -n yolo_tracking python=3.8
+conda activate yolo_tracking
+pip install -v -e .
+pip install boxmot
+```
+
+**Trackers**:
+* bytetrack
+* botsort
+* strongsort
+* ocsort
+* deepocsort
+* hybridsort
+
+**reid-model**:
+* osnet_x0_25_market1501.pt
+* mobilenetv2_x1_4_msmt17.engine
+* resnet50_msmt17.onnx
+* osnet_x1_0_msmt17.pt
+* clip_market1501.pt
+* clip_vehicleid.pt
+
+### Evaluation
+```
+CUDA_VISIBLE_DEVICES=0 python examples/val.py --yolo-model /home/shanliang/workspace/code/yolov8/runs/USVTrack/YOLOv8n46/weights/best.pt --benchmark /home/shanliang/workspace/dataset/USVTrack/Tracking/ --split test --tracking-method hybridsort
+
+
+# saves dets and embs under ./runs/dets_n_embs separately for each selected yolo and reid model
+
+<!-- python tracking/generate_dets_n_embs.py --yolo-model /gpfs/work/cpt/shanliangyao19/code/yolov8-pytorch/logs/loss_2024_05_07_22_53_00/best_epoch_weights.pth --source /home/shanliang/workspace/dataset/USVTrack/Tracking/test --reid-model tracking/weights/osnet_x0_25_msmt17.pt -->
+
+python tracking/generate_dets_n_embs.py --yolo-model /gpfs/work/cpt/shanliangyao19/code/yolov8/runs/USVTrack/YOLOv8n13/weights/best.pt --source /gpfs/work/cpt/shanliangyao19/dataset/USVTrack/dancetrack/test --reid-model tracking/weights/osnet_x0_25_msmt17.pt
+
+python tracking/generate_dets_n_embs.py --yolo-model /gpfs/work/cpt/shanliangyao19/code/yolox/YOLOX_outputs/USVTrack/yolox_m.pth --source /gpfs/work/cpt/shanliangyao19/dataset/USVTrack/dancetrack/test --reid-model tracking/weights/osnet_x0_25_msmt17.pt
+
+python tracking/generate_dets_n_embs.py --yolo-model /gpfs/work/cpt/shanliangyao19/code/yolov8/runs/USVTrack/YOLOv8n13/weights/best.pt --source /gpfs/work/cpt/shanliangyao19/dataset/USVTrack/dancetrack/test --reid-model tracking/weights/osnet_x0_25_msmt17.pt
+
+# generate MOT challenge format results based on pregenerated detections and embeddings for a specific trackign method
+python tracking/generate_mot_results.py --dets yolox_m --embs osnet_x0_25_msmt17 --tracking-method botsort
+
+# uses TrackEval to generate MOT metrics for the tracking results under ./runs/mot/<dets+embs+tracking-method>
+python tracking/val.py --benchmark MOT17-mini --dets yolov8n --embs osnet_x0_25_msmt17 --tracking-method botsort
+```
+
+* Evaluate existing
+
+```
+CUDA_VISIBLE_DEVICES=0 python examples/val.py --yolo-model /home/shanliang/workspace/code/yolov8/runs/USVTrack/YOLOv8n46/weights/best.pt --benchmark /home/shanliang/workspace/dataset/USVTrack/Tracking/ --split test --tracking-method hybridsort --eval-existing --project runs/val --name USVTrack4
+```
+
+
+### Visualization
+```
+CUDA_VISIBLE_DEVICES=0 python examples/val.py --yolo-model /home/shanliang/workspace/code/yolov8/runs/USVTrack/YOLOv8n46/weights/best.pt --benchmark /home/shanliang/workspace/dataset/USVTrack/Tracking/ --split demo --tracking-method hybridsort --save
+```
+
+### Evolution
+```
+CUDA_VISIBLE_DEVICES=0 python examples/evolve.py --yolo-model /home/shanliang/workspace/code/yolov8/runs/USVTrack/YOLOv8n46/weights/best.pt  --benchmark /home/shanliang/workspace/dataset/USVTrack/Tracking/ --split test --tracking-method hybridsort --n-trials 100  # tune strongsort for USVTrack
+                            --tracking-method ocsort     --benchmark <your-custom-dataset> --objective HOTA # tune ocsort for maximizing HOTA on your custom tracking dataset
+```
+
+
+
+---
+
+
 # BoxMOT: pluggable SOTA tracking modules for segmentation, object detection and pose estimation models
 
 <div align="center">
@@ -212,7 +287,7 @@ Evaluate a combination of detector, tracking method and ReID model on standard M
 # saves dets and embs under ./runs/dets_n_embs separately for each selected yolo and reid model
 $ python tracking/generate_dets_n_embs.py --source ./assets/MOT17-mini/train --yolo-model yolov8n.pt yolov8s.pt --reid-model weights/osnet_x0_25_msmt17.pt
 # generate MOT challenge format results based on pregenerated detections and embeddings for a specific trackign method
-$ python tracking/generate_mot_results.py --dets yolov8n --embs osnet_x0_25_msmt17 --tracking-method botsort
+$ python tracking/generate_mot_metrics.py --dets yolov8n --embs osnet_x0_25_msmt17 --tracking-method botsort
 # uses TrackEval to generate MOT metrics for the tracking results under ./runs/mot/<dets+embs+tracking-method>
 $ python tracking/val.py --benchmark MOT17-mini --dets yolov8n --embs osnet_x0_25_msmt17 --tracking-method botsort
 ```
